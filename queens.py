@@ -1,9 +1,16 @@
+from collections import defaultdict
+
+ROWS = 8
+COLS = 8
+
+def validCoordinate(r, c):
+    return (0 <= r < ROWS and 0 <= c < COLS)
+
 def queenAttack(r, c):
-    ROWS = 8
-    COLS = 8
+    
     res = set()
 
-    if not (0 <= r < ROWS or 0 <= c < COLS):
+    if not validCoordinate(r, c):
         print("Not Valid coordinate")
         return
 
@@ -46,32 +53,46 @@ def validQueens(queens):
 
 
 def eight_queens():
+    queensAttackSquares = defaultdict(int) # (r, c) = count
     queens = set()
 
     def dfs(r, c):
-        if not validQueens(queens):
-            return None
-        
         if len(queens) == 8:
-            return queens.copy()
+            return queens
         
-        if r >= 8:
-            return
-        
-        if c < 7:
-            nextRow = r
-            nextCol = c + 1
-        else:
-            nextRow = r + 1
-            nextCol = 0
+        if not validCoordinate(r, c):
+            return None
+
+        while True:
+            if r >= 8:
+                return
             
+            if c < 7:
+                nextRow = r
+                nextCol = c + 1
+            else:
+                nextRow = r + 1
+                nextCol = 0
+
+            if validCoordinate(r, c) and queensAttackSquares[(r, c)] == 0:
+                break
+            else:
+                r = nextRow
+                c = nextCol
+
+        attacks = queenAttack(r, c)
+        for rAttack, cAttack in attacks:
+            queensAttackSquares[(rAttack, cAttack)] += 1
         queens.add((r, c))
         val = dfs(nextRow, nextCol)
         
         if val:
             return val
-        
+
+        for rAttack, cAttack in attacks:
+            queensAttackSquares[(rAttack, cAttack)] -= 1
         queens.remove((r, c))
+
         return dfs(nextRow, nextCol)
 
     return dfs(0, 0)
